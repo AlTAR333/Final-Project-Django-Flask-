@@ -1,0 +1,8 @@
+<h1>Statistics</h1>
+<ul>
+{% for story_id, data in stats.items %}
+    <li>
+        Story ID {{ story_id }} — Started: {{ data.started }}, Finished: {{ data.finished }}
+    </li>
+{% endfor %}
+</ul>
