@@ -1,0 +1,6 @@
+<h1>Stories</h1>
+<ul>
+{% for s in stories %}
+    <li><a href="{% url 'play_story' s.id %}">{{ s.title }}</a></li>
+{% endfor %}
+</ul>
