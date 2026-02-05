@@ -1,1 +1,7 @@
 *.pyc
+django_web/stories/__pycache__/models.cpython-313.pyc
+django_web/stories/__pycache__/urls.cpython-313.pyc
+django_web/stories/__pycache__/views.cpython-313.pyc
+django_web/web/__pycache__/settings.cpython-313.pyc
+flask_api/app/__pycache__/__init__.cpython-313.pyc
+flask_api/app/__pycache__/routes.cpython-313.pyc
