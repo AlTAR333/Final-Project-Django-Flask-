@@ -1,0 +1,135 @@
+/* Generated with Chat-GPT */
+
+/* --- Reset and base --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
+    color: #f5f5f5;
+    line-height: 1.6;
+    padding: 0 20px;
+}
+
+/* --- Links --- */
+a {
+    color: #8fd3f4;
+    text-decoration: none;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+a:hover {
+    color: #e0aaff;
+    text-shadow: 0 0 5px #e0aaff, 0 0 10px #e0aaff;
+}
+
+/* --- Headings --- */
+h1, h2 {
+    font-family: 'Cinzel Decorative', serif;
+    text-align: center;
+    margin: 20px 0;
+    color: #f0e6ff;
+    text-shadow: 0 0 5px #8fd3f4, 0 0 10px #8fd3f4;
+}
+
+/* --- Navigation --- */
+nav {
+    text-align: center;
+    margin: 20px 0;
+}
+
+nav a, nav form button {
+    margin: 0 10px;
+    padding: 5px 10px;
+    border: none;
+    background: #222;
+    color: #f5f5f5;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+nav a:hover, nav form button:hover {
+    background: #8fd3f4;
+    color: #0d0d0d;
+}
+
+/* --- Buttons --- */
+button {
+    background: linear-gradient(45deg, #8fd3f4, #e0aaff);
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0d0d0d;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #e0aaff;
+}
+
+/* --- Forms --- */
+input[type="text"], input[type="password"] {
+    padding: 8px;
+    width: 100%;
+    max-width: 400px;
+    margin: 5px 0 15px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background: #111;
+    color: #f5f5f5;
+}
+
+/* --- Lists (choices, stories) --- */
+ul {
+    list-style-type: none;
+    margin-top: 15px;
+}
+
+ul li {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+ul li:hover {
+    background: rgba(143, 211, 244, 0.2);
+    transform: scale(1.02);
+}
+
+/* --- Footer / HR --- */
+hr {
+    border: 0;
+    height: 2px;
+    background: linear-gradient(to right, #8fd3f4, #e0aaff);
+    margin: 20px 0;
+}
+
+/* --- Choices --- */
+.play-choice a {
+    display: inline-block;
+    padding: 8px 15px;
+    margin: 5px 0;
+    border-radius: 5px;
+    background: rgba(143, 211, 244, 0.2);
+    color: #f5f5f5;
+    text-decoration: none;
+    box-shadow: 0 0 10px #8fd3f4;
+    transition: all 0.3s ease;
+}
+
+.play-choice a:hover {
+    background: rgba(224, 170, 255, 0.3);
+    box-shadow: 0 0 20px #e0aaff, 0 0 40px #8fd3f4;
+    transform: translateY(-2px);
+}
