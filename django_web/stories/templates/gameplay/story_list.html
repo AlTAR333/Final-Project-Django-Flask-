@@ -1,6 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Stories</h1>
+
+<form method="get">
+    <input type="text" name="q" placeholder="Search by title" value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
 <ul>
 {% for s in stories %}
     <li><a href="{% url 'play_story' s.id %}">{{ s.title }}</a></li>
+{% empty %}
+    <li>No stories found.</li>
 {% endfor %}
 </ul>
+{% endblock %}
