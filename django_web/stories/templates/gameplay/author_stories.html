@@ -6,12 +6,25 @@
 <ul>
 {% for s in stories %}
     <li>
-        {{ s.title }} — Status: {{ s.status }} 
+        {{ s.title }} — Status: {{ s.status }}
+
+        <form method="post" action="{% url 'toggle_story_status' s.id %}" style="display:inline;">
+            {% csrf_token %}
+            {% if s.status == "draft" %}
+                <input type="hidden" name="status" value="published">
+                <button type="submit">Publish</button>
+            {% else %}
+                <input type="hidden" name="status" value="draft">
+                <button type="submit">Unpublish</button>
+            {% endif %}
+        </form>
+
         | <a href="{% url 'preview_story' s.id %}">Preview</a>
         | <a href="{% url 'delete_story' s.id %}">Delete</a>
     </li>
-    {% empty %}
+{% empty %}
     <li>No stories found.</li>
 {% endfor %}
 </ul>
+
 {% endblock %}

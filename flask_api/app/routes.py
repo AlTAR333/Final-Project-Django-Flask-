@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
 from app.models import Story, Page, Choice
+from app.__init__ import db
 
 api = Blueprint("api", __name__)
 
@@ -28,6 +29,12 @@ def list_stories():
     if owner:
         query = query.filter_by(owner_username=owner)
     stories = query.all()
+
+    for s in stories:
+        print("Returning story:", s.id, s.status)
+
+    import os
+    print("DB path:", os.path.abspath("app.db"))
 
     return jsonify([{
             "id": s.id,
@@ -62,11 +69,51 @@ def get_story_start(story_id):
     page = Page.query.get_or_404(story.start_page_id)
     return _serialize_page(page)
 
+@api.route("/stories/<int:story_id>/endings", methods=["GET"])
+def get_story_endings(story_id):
+    pages = Page.query.filter_by(
+        story_id=story_id,
+        is_ending=True
+    ).all()
+
+    return jsonify([
+        {
+            "id": p.id,
+            "label": p.ending_label
+        }
+        for p in pages
+    ])
 
 @api.route("/pages/<int:page_id>", methods=["GET"])
 def get_page(page_id):
     page = Page.query.get_or_404(page_id)
     return _serialize_page(page)
+
+@api.route("/stories/<int:story_id>/status", methods=["PATCH"])
+def update_story_status(story_id):
+    data = request.get_json()
+    new_status = data.get("status")
+    username = data.get("username")
+
+    if new_status not in ["draft", "published"]:
+        return jsonify({"error": "Invalid status"}), 400
+
+    story = Story.query.get_or_404(story_id)
+
+    if story.owner_username != username:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    story.status = new_status
+    db.session.commit()
+
+    print("Story owner:", story.owner_username)
+    print("Username from request:", username)
+
+    import os
+    print("DB path:", os.path.abspath("app.db"))
+
+
+    return jsonify({"message": "Status updated"})
 
 
 def _serialize_page(page):

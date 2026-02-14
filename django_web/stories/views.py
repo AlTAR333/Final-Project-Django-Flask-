@@ -120,6 +120,9 @@ def stats(request):
     stats_data = {}
 
     for story_id in story_ids:
+        # Fetch ending labels from Flask
+        endings_response = requests.get(f"{FLASK_API_URL}/stories/{story_id}/endings")
+        ending_labels = {e["id"]: e["label"] for e in endings_response.json()}
         started_count = PlaySession.objects.filter(user=user, story_id=story_id).count()
         finished_count = Play.objects.filter(user=user, story_id=story_id).count()
 
@@ -128,7 +131,7 @@ def stats(request):
 
         for e in endings_qs:
             percentage = round((e["count"] / finished_count) * 100, 1) if finished_count else 0
-            endings[e["ending_page_id"]] = {"label": f"Ending {e['ending_page_id']}", "count": e["count"], "percentage": percentage,}
+            endings[e["ending_page_id"]] = {"label": ending_labels.get(e["ending_page_id"], f"Ending {e['ending_page_id']}"), "count": e["count"], "percentage": percentage,}
 
         stats_data[story_id] = {"started": started_count, "finished": finished_count, "endings": endings,}
 
@@ -197,3 +200,20 @@ def logout_view(request):
     """
     logout(request)
     return redirect("story_list")
+
+@login_required
+def toggle_story_status(request, story_id):
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+
+        response = requests.patch(
+            f"{FLASK_API_URL}/stories/{story_id}/status",
+            json={
+                "status": new_status,
+                "username": request.user.username
+            }
+        )
+
+        print("Flask response:", response.status_code, response.text)
+
+    return redirect("author_stories")

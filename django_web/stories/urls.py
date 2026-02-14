@@ -14,5 +14,7 @@ urlpatterns = [
     path("author/story/<int:story_id>/preview/", views.preview_story, name="preview_story"),
     path("author/story/<int:story_id>/delete/", views.delete_story, name="delete_story"),
     
-    path("register/", views.register, name="register")
+    path("register/", views.register, name="register"),
+
+    path("stories/<int:story_id>/status/", views.toggle_story_status, name="toggle_story_status"),
 ]
