@@ -1,70 +1,199 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 import requests
-from .models import Play, PlaySession
-from django.db.models import Count
+from .models import Play, PlaySession, Story
+from django.db.models import Count, F
 from django.utils import timezone
+from django.contrib import messages
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 FLASK_API_URL = "http://127.0.0.1:5000"
 
-def home(request):
-    return HttpResponse("NAHB – Django Web App OK")
-
 def api_test(request):
+    """
+    Test api status
+    """
     r = requests.get(f"{FLASK_API_URL}/ping")
     return JsonResponse(r.json())
 
+def is_author(user):
+    """
+    Check if user is author
+    """
+    return user.groups.filter(name="Author").exists() or user.is_staff
+
+@login_required
+def author_stories(request):
+    """
+    List stories per author
+    """
+    response = requests.get(f"{FLASK_API_URL}/stories",params={"owner": request.user.username})
+    return render(
+        request,
+        "gameplay/author_stories.html",
+        {"stories": response.json()}
+    )
+
+@login_required
+def delete_story(request, story_id):
+    """
+    Delete a story (if user is owner)
+    """
+    story = requests.get(f"{FLASK_API_URL}/stories/{story_id}").json()
+    
+    # check ownership (DONE)
+    if story.get("owner_id") != request.user.id and not request.user.is_staff:
+        messages.error(request, "You are not allowed to delete this story")
+        return redirect("author_stories")
+
+    if request.method == "POST":
+        requests.delete(f"{FLASK_API_URL}/stories/{story_id}")
+        messages.success(request, "Story deleted")
+        return redirect("author_stories")
+    
+    return render(request, "gameplay/confirm_delete.html", {"story": story})
+
+@login_required
 def story_list(request):
-    response = requests.get(f"{FLASK_API_URL}/stories?status=published")
+    """
+    List all the published stories
+    """
+    query = request.GET.get("q", "")
+    response = requests.get(f"{FLASK_API_URL}/stories", params={"status": "published"})
     stories = response.json()
-    return render(request, "gameplay/story_list.html", {"stories": stories})
+    if query:
+        stories = [s for s in stories if query.lower() in s["title"].lower()]
 
+    return render(request, "gameplay/story_list.html", {"stories": stories, "query": query})
+
+@login_required
 def play_story(request, story_id, page_id=None):
-    if page_id is None:
-        response = requests.get(f"{FLASK_API_URL}/stories/{story_id}/start")
-    else:
-        response = requests.get(f"{FLASK_API_URL}/pages/{page_id}")
+    """
+    Play a story.
+    - Creates a PlaySession if none exists
+    - Calls Flask API to get page + choices
+    """
+    # Get / create the session
+    ps, created = PlaySession.objects.get_or_create(
+        user=request.user, story_id=story_id, ended_at__isnull=True,
+        defaults={"started_at": timezone.now()}
+    )
 
-    page = response.json()
+    # Determine current page
+    if page_id is None and ps.current_page_id:
+        page_id = ps.current_page_id
+    elif page_id is None:
+        resp = requests.get(f"{FLASK_API_URL}/stories/{story_id}/start")
+        if resp.status_code != 200:
+            return render(request, "gameplay/error.html", {"message": "Story has no start page"})
+        page = resp.json()
+        page_id = page["id"]
 
-    # track session
-    session_id = request.session.get(f"play_{story_id}")
-    if not session_id:
-        # start a new session
-        ps = PlaySession.objects.create(story_id=story_id)
-        request.session[f"play_{story_id}"] = ps.id
-    else:
-        ps = PlaySession.objects.get(id=session_id)
+    # Call the Flask API for current page
+    resp = requests.get(f"{FLASK_API_URL}/pages/{page_id}")
+    if resp.status_code != 200:
+        return render(request, "gameplay/error.html", {"message": "Page not found"})
+    page = resp.json()
 
+    # PlaySession upadte
+    ps.current_page_id = page["id"]
     if page["is_ending"]:
-        # mark when session finished
         ps.ended_at = timezone.now()
-        ps.save()
-
-        # save Play
-        Play.objects.create(story_id=story_id, ending_page_id=page["id"])
-
-        # clears session
-        del request.session[f"play_{story_id}"]
+        Play.objects.create(user=request.user, story_id=story_id, ending_page_id=page["id"])
+    ps.save()
 
     return render(request, "gameplay/play_page.html", {"page": page})
 
+@login_required
 def stats(request):
-    # count all number of starts
-    starts = PlaySession.objects.values("story_id").annotate(count=Count("id"))
-    starts_dict = {s["story_id"]: s["count"] for s in starts}
+    """
+    Return the stats per Story
+    """
+    user = request.user
+    story_ids = (PlaySession.objects.filter(user=user).values_list("story_id", flat=True).distinct())
 
-    # count all number of finishes
-    finishes = Play.objects.values("story_id").annotate(count=Count("id"))
-    finishes_dict = {f["story_id"]: f["count"] for f in finishes}
+    stats_data = {}
 
-    # combine both
-    story_ids = set(list(starts_dict.keys()) + list(finishes_dict.keys()))
-    stats_dict = {}
-    for sid in story_ids:
-        stats_dict[sid] = {
-            "started": starts_dict.get(sid, 0),
-            "finished": finishes_dict.get(sid, 0)
-        }
+    for story_id in story_ids:
+        started_count = PlaySession.objects.filter(user=user, story_id=story_id).count()
+        finished_count = Play.objects.filter(user=user, story_id=story_id).count()
 
-    return render(request, "gameplay/stats.html", {"stats": stats_dict})
+        endings_qs = (Play.objects.filter(user=user, story_id=story_id).values("ending_page_id").annotate(count=Count("id")))
+        endings = {}
+
+        for e in endings_qs:
+            percentage = round((e["count"] / finished_count) * 100, 1) if finished_count else 0
+            endings[e["ending_page_id"]] = {"label": f"Ending {e['ending_page_id']}", "count": e["count"], "percentage": percentage,}
+
+        stats_data[story_id] = {"started": started_count, "finished": finished_count, "endings": endings,}
+
+    if story_ids:
+        response = requests.get(f"{FLASK_API_URL}/stories")
+        flask_stories = response.json()
+        for s in flask_stories:
+            if s["id"] in stats_data:
+                stats_data[s["id"]]["title"] = s["title"]
+
+    return render(request, "gameplay/stats.html", {"stats": stats_data})
+
+@login_required
+def preview_story(request, story_id):
+    """
+    Play a draft story without saving stats
+    """
+    response = requests.get(f"{FLASK_API_URL}/stories/{story_id}/start")
+    page = response.json()
+
+    # use a "preview session" that won't save stats
+    request.session[f"preview_{story_id}"] = page["id"]
+
+    return render(request, "gameplay/play_page.html", {"page": page, "preview": True})
+
+def register(request):
+    """
+    Register a new user
+    """
+    if request.user.is_authenticated:
+        return redirect("story_list")
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists.")
+        else:
+            User.objects.create_user(username=username, password=password1)
+            messages.success(request, "Account created. You can now log in.")
+            return redirect("login")
+
+    return render(request, "gameplay/register.html")
+
+def login_view(request):
+    """
+    Login
+    """
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("story_list")
+    else:
+        form = AuthenticationForm()
+    return render(request, "gameplay/login.html", {"form": form})
+
+def logout_view(request):
+    """
+    Logout (Django)
+    """
+    logout(request)
+    return redirect("story_list")
