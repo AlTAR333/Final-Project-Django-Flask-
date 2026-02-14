@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Author Stories</h1>
+
+<ul>
+{% for s in stories %}
+    <li>
+        {{ s.title }} — Status: {{ s.status }} 
+        | <a href="{% url 'preview_story' s.id %}">Preview</a>
+        | <a href="{% url 'delete_story' s.id %}">Delete</a>
+    </li>
+    {% empty %}
+    <li>No stories found.</li>
+{% endfor %}
+</ul>
+{% endblock %}
