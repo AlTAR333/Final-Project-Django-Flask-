@@ -1,8 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Statistics</h1>
+
 <ul>
 {% for story_id, data in stats.items %}
     <li>
-        Story ID {{ story_id }} — Started: {{ data.started }}, Finished: {{ data.finished }}
+        <strong>{{ data.title }}</strong>
+        — Started: {{ data.started }},
+        Finished: {{ data.finished }}
+
+        {% if data.endings %}
+            <ul>
+            {% for page_id, e in data.endings.items %}
+                <li>
+                    {{ e.label }} —
+                    {{ e.count }} times
+                    ({{ e.percentage }}%)
+                </li>
+            {% endfor %}
+            </ul>
+        {% endif %}
     </li>
+    <br>
+    {% empty %}
+    <li>No statistics found.</li>
 {% endfor %}
 </ul>
+{% endblock %}
