@@ -3,24 +3,41 @@ from app.models import Story, Page, Choice
 
 api = Blueprint("api", __name__)
 
+API_KEY = "SECRET_KEY"
+
+def require_api_key(func):
+    def wrapper(*args, **kwargs):
+        key = request.headers.get("X-API-KEY")
+        if key != API_KEY:
+            abort(401, description="Invalid API Key")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 @api.route("/ping")
 def ping():
     return jsonify({"status": "ok", "service": "flask_api"})
 
 @api.route("/stories", methods=["GET"])
 def list_stories():
-    status = request.args.get("status", "published")
-    stories = Story.query.filter_by(status=status).all()
+    status = request.args.get("status")
+    owner = request.args.get("owner")
+    query = Story.query
+    if status:
+        query = query.filter_by(status=status)
+    if owner:
+        query = query.filter_by(owner_username=owner)
+    stories = query.all()
 
     return jsonify([{
             "id": s.id,
             "title": s.title,
             "description": s.description,
-            "status": s.status
+            "status": s.status,
+            "owner_username": s.owner_username
         }
         for s in stories
     ])
-
 
 @api.route("/stories/<int:story_id>", methods=["GET"])
 def get_story(story_id):
