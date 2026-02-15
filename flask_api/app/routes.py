@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, abort
 from app.models import Story, Page, Choice
-from app.__init__ import db
+from app import db
 
 api = Blueprint("api", __name__)
 
@@ -21,6 +21,7 @@ def ping():
 
 @api.route("/stories", methods=["GET"])
 def list_stories():
+    print("Story class id:", id(Story))
     status = request.args.get("status")
     owner = request.args.get("owner")
     query = Story.query
@@ -71,18 +72,9 @@ def get_story_start(story_id):
 
 @api.route("/stories/<int:story_id>/endings", methods=["GET"])
 def get_story_endings(story_id):
-    pages = Page.query.filter_by(
-        story_id=story_id,
-        is_ending=True
-    ).all()
-
-    return jsonify([
-        {
-            "id": p.id,
-            "label": p.ending_label
-        }
-        for p in pages
-    ])
+    pages = Page.query.filter_by(story_id=story_id, is_ending=True).all()
+    
+    return jsonify([{"id": p.id, "label": p.ending_label} for p in pages])
 
 @api.route("/pages/<int:page_id>", methods=["GET"])
 def get_page(page_id):
@@ -91,6 +83,7 @@ def get_page(page_id):
 
 @api.route("/stories/<int:story_id>/status", methods=["PATCH"])
 def update_story_status(story_id):
+    print("Story class id:", id(Story))
     data = request.get_json()
     new_status = data.get("status")
     username = data.get("username")
@@ -103,8 +96,11 @@ def update_story_status(story_id):
     if story.owner_username != username:
         return jsonify({"error": "Unauthorized"}), 403
 
+    print("Before change:", story.status)
     story.status = new_status
+    print("Assigned:", story.status)
     db.session.commit()
+    print("After commit:", story.status)
 
     print("Story owner:", story.owner_username)
     print("Username from request:", username)
