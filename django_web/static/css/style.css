@@ -115,6 +115,7 @@ hr {
     margin: 20px 0;
 }
 
+
 /* --- Choices --- */
 .play-choice a {
     display: inline-block;
@@ -132,4 +133,53 @@ hr {
     background: rgba(224, 170, 255, 0.3);
     box-shadow: 0 0 20px #e0aaff, 0 0 40px #8fd3f4;
     transform: translateY(-2px);
+}
+
+/* --- Story page layout --- */
+.story-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.story-text {
+    background: rgba(30, 30, 50, 0.9);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 0 20px #8fd3f4, 0 0 40px #e0aaff;
+    font-size: 1.2em;
+    line-height: 1.6;
+}
+
+.choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.choice-box a {
+    display: block;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: rgba(143, 211, 244, 0.15);
+    color: #f5f5f5;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px #8fd3f4;
+}
+
+.choice-box a:hover {
+    background: rgba(224, 170, 255, 0.25);
+    box-shadow: 0 0 20px #e0aaff, 0 0 40px #8fd3f4;
+    transform: translateY(-3px);
+}
+
+.ending-box {
+    background: rgba(50, 30, 50, 0.9);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #e0aaff;
 }

@@ -1,25 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{ page.text }}</h2>
 
-{% if not page.is_ending %}
-<ul>
-{% for choice in page.choices %}
-    <li class="play-choice">
-        <a href="{% url 'play_story' page.story_id choice.next_page_id %}">
-            {{ choice.text }}
-        </a>
-    </li>
-{% endfor %}
-</ul>
-{% else %}
-<p>Fin de l’histoire !</p>
+<div class="story-container">
+    <h2>{{ page.story.title }}</h2>
 
-{% if page.ending_label %}
-    <p><strong>Ending:</strong> {{ page.ending_label }}</p>
-{% endif %}
+    <div class="story-text">
+        <p>{{ page.text }}</p>
+    </div>
 
-<a href="{% url 'story_list' %}">Retour aux histoires</a>
-{% endif %}
+    {% if not page.is_ending %}
+        <div class="choices-container">
+            {% for choice in page.choices %}
+            <div class="choice-box">
+                <a href="{% url 'play_story' page.story_id choice.next_page_id %}">
+                    {{ choice.text }}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="ending-box">
+            <p>End of the story.</p>
+            {% if page.ending_label %}
+                <p><strong>Ending:</strong> {{ page.ending_label }}</p>
+            {% endif %}
+            <a href="{% url 'story_list' %}">Retour aux histoires</a>
+        </div>
+    {% endif %}
+</div>
+
 {% endblock %}
+
