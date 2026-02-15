@@ -18,7 +18,7 @@
                 <button type="submit">Unpublish</button>
             {% endif %}
         </form>
-
+        | <a href="{% url 'edit_story' s.id %}">Edit</a>
         | <a href="{% url 'preview_story' s.id %}">Preview</a>
         | <a href="{% url 'delete_story' s.id %}">Delete</a>
     </li>

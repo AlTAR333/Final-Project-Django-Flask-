@@ -17,4 +17,5 @@ urlpatterns = [
     path("register/", views.register, name="register"),
 
     path("stories/<int:story_id>/status/", views.toggle_story_status, name="toggle_story_status"),
+    path("author/story/<int:story_id>/edit/", views.edit_story, name="edit_story"),
 ]

@@ -73,8 +73,94 @@ def get_story_start(story_id):
 @api.route("/stories/<int:story_id>/endings", methods=["GET"])
 def get_story_endings(story_id):
     pages = Page.query.filter_by(story_id=story_id, is_ending=True).all()
-    
+
     return jsonify([{"id": p.id, "label": p.ending_label} for p in pages])
+
+@api.route("/stories/<int:story_id>/pages", methods=["GET"])
+def get_story_pages(story_id):
+    pages = Page.query.filter_by(story_id=story_id).order_by(Page.id).all()
+
+    result = []
+
+    page_number_map = {p.id: i+1 for i, p in enumerate(pages)}
+
+    for index, p in enumerate(pages, start=1):
+        result.append({
+            "id": p.id,
+            "number": index,
+            "text": p.text,
+            "is_ending": p.is_ending,
+            "ending_label": p.ending_label,
+            "choices": [
+                {
+                    "id": c.id,
+                    "text": c.text,
+                    "next_page_id": c.next_page_id,
+                    "next_page_number": page_number_map.get(c.next_page_id)
+                }
+                for c in p.choices
+            ]
+        })
+
+    return jsonify(result)
+
+@api.route("/stories/<int:story_id>/pages", methods=["POST"])
+def create_page(story_id):
+    data = request.get_json()
+
+    page = Page(
+        story_id=story_id,
+        text=data.get("text"),
+        is_ending=data.get("is_ending", False),
+        ending_label=data.get("ending_label")
+    )
+
+    db.session.add(page)
+    db.session.commit()
+
+    return jsonify({"message": "Page created", "id": page.id}), 201
+
+@api.route("/pages/<int:page_id>", methods=["PATCH"])
+def update_page(page_id):
+    data = request.get_json()
+
+    page = Page.query.get_or_404(page_id)
+
+    page.text = data.get("text", page.text)
+    page.is_ending = data.get("is_ending", page.is_ending)
+    page.ending_label = data.get("ending_label", page.ending_label)
+
+    db.session.commit()
+
+    return jsonify({"message": "Page updated"})
+
+@api.route("/pages/<int:page_id>/choices", methods=["POST"])
+def create_choice(page_id):
+    data = request.get_json()
+
+    choice = Choice(
+        page_id=page_id,
+        text=data.get("text"),
+        next_page_id=data.get("next_page_id")
+    )
+
+    db.session.add(choice)
+    db.session.commit()
+
+    return jsonify({"message": "Choice created"})
+
+@api.route("/choices/<int:choice_id>", methods=["PATCH"])
+def update_choice(choice_id):
+    data = request.get_json()
+
+    choice = Choice.query.get_or_404(choice_id)
+
+    choice.text = data.get("text", choice.text)
+    choice.next_page_id = data.get("next_page_id", choice.next_page_id)
+
+    db.session.commit()
+
+    return jsonify({"message": "Choice updated"})
 
 @api.route("/pages/<int:page_id>", methods=["GET"])
 def get_page(page_id):

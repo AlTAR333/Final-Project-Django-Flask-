@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with pages_dict=pages|dictsort:"id" %}
+{% endwith %}
+<h1>Edit Story: {{ story.title }}</h1>
+
+<h2>Pages</h2>
+
+{% for p in pages %}
+    <div style="border:1px solid black; padding:10px; margin-bottom:15px;">
+
+        <strong>Page {{ p.number }}</strong>
+        <p>{{ p.text }}</p>
+
+        {% if p.is_ending %}
+            <p><strong>Ending:</strong> {{ p.ending_label }}</p>
+        {% endif %}
+
+        <h4>Choices:</h4>
+
+        {% if p.choices %}
+            <ul>
+            {% for c in p.choices %}
+                <li>
+                    "{{ c.text }}" → goes to Page {{ c.next_page_number }}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No choices.</p>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
+<a href="{% url 'author_stories' %}">← Back to My Stories</a>
+
+{% endblock %}

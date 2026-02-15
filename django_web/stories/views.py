@@ -217,3 +217,17 @@ def toggle_story_status(request, story_id):
         print("Flask response:", response.status_code, response.text)
 
     return redirect("author_stories")
+
+@login_required
+def edit_story(request, story_id):
+    story = requests.get(f"{FLASK_API_URL}/stories/{story_id}").json()
+    pages = requests.get(f"{FLASK_API_URL}/stories/{story_id}/pages").json()
+
+    return render(
+        request,
+        "gameplay/edit_story.html",
+        {
+            "story": story,
+            "pages": pages
+        }
+    )
