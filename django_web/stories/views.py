@@ -152,7 +152,6 @@ def preview_story(request, story_id):
     response = requests.get(f"{FLASK_API_URL}/stories/{story_id}/start")
     page = response.json()
 
-    # use a "preview session" that won't save stats
     request.session[f"preview_{story_id}"] = page["id"]
 
     return render(request, "gameplay/play_page.html", {"page": page, "preview": True})
@@ -231,3 +230,57 @@ def edit_story(request, story_id):
             "pages": pages
         }
     )
+
+@login_required
+def create_page(request, story_id):
+    if request.method == "POST":
+        text = request.POST.get("text")
+
+        requests.post(
+            f"{FLASK_API_URL}/stories/{story_id}/pages",
+            json={"text": text}
+        )
+
+    return redirect("edit_story", story_id=story_id)
+
+@login_required
+def update_page(request, page_id, story_id):
+    if request.method == "POST":
+        text = request.POST.get("text")
+
+        requests.patch(
+            f"{FLASK_API_URL}/pages/{page_id}",
+            json={"text": text}
+        )
+
+    return redirect("edit_story", story_id=story_id)
+
+@login_required
+def create_choice(request, story_id, page_id):
+    if request.method == "POST":
+        text = request.POST.get("text")
+        next_page_id = request.POST.get("next_page_id")
+
+        requests.post(
+            f"{FLASK_API_URL}/pages/{page_id}/choices",
+            json={
+                "text": text,
+                "next_page_id": int(next_page_id)
+            }
+        )
+
+    return redirect("edit_story", story_id=story_id)
+
+@login_required
+def toggle_ending(request, page_id, story_id):
+    if request.method == "POST":
+        is_ending = request.POST.get("is_ending") == "true"
+        ending_label = request.POST.get("ending_label", "")
+
+        requests.patch(
+            f"{FLASK_API_URL}/pages/{page_id}",
+            json={"is_ending": is_ending, "ending_label": ending_label}
+        )
+
+    return redirect("edit_story", story_id=story_id)
+

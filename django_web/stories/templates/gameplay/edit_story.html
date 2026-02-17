@@ -3,36 +3,105 @@
 {% block content %}
 {% with pages_dict=pages|dictsort:"id" %}
 {% endwith %}
-<h1>Edit Story: {{ story.title }}</h1>
+<h1>{{ story.title }} - Edit</h1>
 
 <h2>Pages</h2>
 
 {% for p in pages %}
-    <div style="border:1px solid black; padding:10px; margin-bottom:15px;">
+    <div class="page-card">
 
-        <strong>Page {{ p.number }}</strong>
-        <p>{{ p.text }}</p>
+        <div class="page-header">
+            <span class="page-number">Page {{ p.number }}</span>
+            {% if p.is_ending %}
+                <span class="ending-badge">Ending</span>
+            {% endif %}
+        </div>
+
+        <div class="page-content">
+            <p>{{ p.text }}</p>
+        </div>
 
         {% if p.is_ending %}
-            <p><strong>Ending:</strong> {{ p.ending_label }}</p>
+            <div class="ending-label">
+                <strong>Ending:</strong> {{ p.ending_label }}
+            </div>
         {% endif %}
 
-        <h4>Choices:</h4>
+        <div class="editor-panel">
+            <form method="post" action="{% url 'update_page' story.id p.id %}">
+                {% csrf_token %}
+                <textarea name="text" rows="3">{{ p.text }}</textarea>
+                <button type="submit">Update Page</button>
+            </form>
+        </div>
+        {% if not p.is_ending %}
+        <div class="choices-section">
+            <h4>Choices</h4>
 
-        {% if p.choices %}
-            <ul>
-            {% for c in p.choices %}
-                <li>
-                    "{{ c.text }}" → goes to Page {{ c.next_page_number }}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>No choices.</p>
+            {% if p.choices %}
+                <ul class="choices-list">
+                {% for c in p.choices %}
+                    <li>
+                        "{{ c.text }}" → Page {{ c.next_page_number }}
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-choices">No choices.</p>
+            {% endif %}
+        </div>
+
+        <div class="editor-panel">
+            <h4>Add Choice</h4>
+
+            <form method="post" action="{% url 'create_choice' story.id p.id %}">
+                {% csrf_token %}
+
+                <input type="text" name="text" placeholder="Choice text">
+
+                <label>Leads to page:</label>
+                <select name="next_page_id">
+                    {% for target in pages %}
+                        <option value="{{ target.id }}">
+                            Page {{ target.number }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Add Choice</button>
+            </form>
+        </div>
         {% endif %}
+
+        <div class="editor-panel">
+            <h4>Ending Status</h4>
+
+            <form method="post" action="{% url 'toggle_ending' story.id p.id %}">
+                {% csrf_token %}
+
+                <label class="ending-checkbox">
+                    <input type="checkbox" name="is_ending" value="true" {% if p.is_ending %}checked{% endif %}>
+                    This is an ending page
+                </label>
+
+                <input type="text" name="ending_label" value="{{ p.ending_label }}" placeholder="Ending label">
+
+                <button type="submit">Update Ending</button>
+            </form>
+        </div>
 
     </div>
 {% endfor %}
+
+
+<h3>Add New Page</h3>
+<div class="editor-panel">
+    <form method="post" action="{% url 'create_page' story.id %}">
+        {% csrf_token %}
+        <textarea name="text" rows="4" cols="50" placeholder="Page text"></textarea><br>
+        <button type="submit">Create Page</button>
+    </form>
+</div>
 
 <a href="{% url 'author_stories' %}">← Back to My Stories</a>
 

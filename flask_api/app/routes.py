@@ -123,31 +123,43 @@ def create_page(story_id):
 @api.route("/pages/<int:page_id>", methods=["PATCH"])
 def update_page(page_id):
     data = request.get_json()
-
     page = Page.query.get_or_404(page_id)
 
-    page.text = data.get("text", page.text)
-    page.is_ending = data.get("is_ending", page.is_ending)
-    page.ending_label = data.get("ending_label", page.ending_label)
+    if "text" in data:
+        page.text = data["text"]
+
+    if "is_ending" in data:
+        page.is_ending = data["is_ending"]
+
+        if page.is_ending:
+            for choice in page.choices:
+                db.session.delete(choice)
+
+    if "ending_label" in data:
+        page.ending_label = data["ending_label"]
 
     db.session.commit()
-
     return jsonify({"message": "Page updated"})
+
 
 @api.route("/pages/<int:page_id>/choices", methods=["POST"])
 def create_choice(page_id):
     data = request.get_json()
+    page = Page.query.get_or_404(page_id)
+
+    if page.is_ending:
+        return jsonify({"error": "Cannot add choices to an ending page"}), 400
 
     choice = Choice(
         page_id=page_id,
-        text=data.get("text"),
+        text=data.get("text", ""),
         next_page_id=data.get("next_page_id")
     )
 
     db.session.add(choice)
     db.session.commit()
 
-    return jsonify({"message": "Choice created"})
+    return jsonify({"message": "Choice added", "choice_id": choice.id})
 
 @api.route("/choices/<int:choice_id>", methods=["PATCH"])
 def update_choice(choice_id):
@@ -212,3 +224,12 @@ def _serialize_page(page):
             }
             for c in page.choices
     ]})
+
+@api.route("/choices/<int:choice_id>", methods=["DELETE"])
+def delete_choice(choice_id):
+    choice = Choice.query.get_or_404(choice_id)
+
+    db.session.delete(choice)
+    db.session.commit()
+
+    return jsonify({"message": "Choice deleted"})
