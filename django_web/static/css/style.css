@@ -300,7 +300,7 @@ hr {
     border-color: #8fd3f4;
 }
 
-/* Ending status inputs & checkbox
+/* Ending status inputs & checkbox */
 .editor-panel form input[type="text"] {
     width: 100%;
     padding: 10px;
@@ -327,4 +327,49 @@ hr {
 
 .editor-panel form input[type="checkbox"] {
     margin-right: 8px;
-} */
+}
+
+/* ============================= */
+/* 🔥 Danger Buttons */
+/* ============================= */
+
+.btn-danger {
+    background: rgba(255, 70, 70, 0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 70, 70, 0.4);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.25s ease;
+}
+
+.btn-danger:hover {
+    background: rgba(255, 70, 70, 0.25);
+    border-color: #ff4c4c;
+    box-shadow: 0 0 8px rgba(255, 70, 70, 0.5);
+}
+
+/* Smaller version for choices */
+.btn-danger.small {
+    padding: 4px 10px;
+    font-size: 0.85em;
+}
+
+/* Inline form fix */
+.inline-form {
+    display: inline;
+    margin-right: 1rem;
+
+}
+.choice-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Spacing for danger section */
+.danger-form {
+    margin-top: 15px;
+}

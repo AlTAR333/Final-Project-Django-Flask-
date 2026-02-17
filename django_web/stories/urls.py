@@ -19,8 +19,13 @@ urlpatterns = [
     path("stories/<int:story_id>/status/", views.toggle_story_status, name="toggle_story_status"),
 
     path("author/story/<int:story_id>/edit/", views.edit_story, name="edit_story"),
+
     path("author/story/<int:story_id>/create_page/", views.create_page, name="create_page"),
     path("author/story/<int:story_id>/page/<int:page_id>/update/", views.update_page, name="update_page"),
+    path("author/story/<int:story_id>/page/<int:page_id>/delete/", views.delete_page, name="delete_page"),
+
     path("author/story/<int:story_id>/page/<int:page_id>/create_choice/", views.create_choice, name="create_choice"),
+    path("author/story/<int:story_id>/choice/<int:choice_id>/delete/", views.delete_choice, name="delete_choice"),
+    
     path("author/story/<int:story_id>/page/<int:page_id>/toggle-ending/", views.toggle_ending, name="toggle_ending"),
 ]

@@ -41,8 +41,16 @@
             {% if p.choices %}
                 <ul class="choices-list">
                 {% for c in p.choices %}
-                    <li>
+                    <li class="choice-display">
                         "{{ c.text }}" → Page {{ c.next_page_number }}
+                        <form method="post"
+                            action="{% url 'delete_choice' story.id c.id %}"
+                            class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger small">
+                                Delete
+                            </button>
+                        </form>
                     </li>
                 {% endfor %}
                 </ul>
@@ -89,6 +97,15 @@
                 <button type="submit">Update Ending</button>
             </form>
         </div>
+
+        <form method="post"
+            action="{% url 'delete_page' story.id p.id %}"
+            class="danger-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger">
+                Delete Page
+            </button>
+        </form>
 
     </div>
 {% endfor %}

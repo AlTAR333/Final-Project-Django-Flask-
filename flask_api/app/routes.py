@@ -209,6 +209,30 @@ def update_story_status(story_id):
 
     return jsonify({"message": "Status updated"})
 
+@api.route("/choices/<int:choice_id>", methods=["DELETE"])
+def delete_choice(choice_id):
+    choice = Choice.query.get_or_404(choice_id)
+
+    db.session.delete(choice)
+    db.session.commit()
+
+    return jsonify({"message": "Choice deleted"})
+
+@api.route("/pages/<int:page_id>", methods=["DELETE"])
+def delete_page(page_id):
+    page = Page.query.get_or_404(page_id)
+
+    incoming_choices = Choice.query.filter_by(next_page_id=page_id).all()
+    for choice in incoming_choices:
+        db.session.delete(choice)
+
+    for choice in page.choices:
+        db.session.delete(choice)
+
+    db.session.delete(page)
+    db.session.commit()
+
+    return jsonify({"message": "Page deleted"})
 
 def _serialize_page(page):
     return jsonify({
@@ -224,12 +248,3 @@ def _serialize_page(page):
             }
             for c in page.choices
     ]})
-
-@api.route("/choices/<int:choice_id>", methods=["DELETE"])
-def delete_choice(choice_id):
-    choice = Choice.query.get_or_404(choice_id)
-
-    db.session.delete(choice)
-    db.session.commit()
-
-    return jsonify({"message": "Choice deleted"})

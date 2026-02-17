@@ -284,3 +284,16 @@ def toggle_ending(request, page_id, story_id):
 
     return redirect("edit_story", story_id=story_id)
 
+@login_required
+def delete_choice(request, story_id, choice_id):
+    if request.method == "POST":
+        requests.delete(f"{FLASK_API_URL}/choices/{choice_id}")
+
+    return redirect("edit_story", story_id=story_id)
+
+@login_required
+def delete_page(request, story_id, page_id):
+    if request.method == "POST":
+        requests.delete(f"{FLASK_API_URL}/pages/{page_id}")
+
+    return redirect("edit_story", story_id=story_id)
