@@ -183,3 +183,148 @@ hr {
     border-radius: 12px;
     box-shadow: 0 0 15px #e0aaff;
 }
+
+/* ============================= */
+/* ✨ Story Edit Page Layout ✨ */
+/* ============================= */
+
+.page-card {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 25px;
+    background: rgba(25, 25, 40, 0.95);
+    border-radius: 12px;
+    border: 1px solid rgba(143, 211, 244, 0.2);
+    box-shadow: 0 0 15px rgba(143, 211, 244, 0.1);
+}
+
+/* Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.page-number {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #8fd3f4;
+}
+
+.ending-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(224, 170, 255, 0.2);
+    color: #e0aaff;
+    font-size: 0.8em;
+}
+
+/* Page text */
+.page-content {
+    background: rgba(15, 15, 25, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+/* Ending label */
+.ending-label {
+    margin-bottom: 15px;
+    color: #e0aaff;
+}
+
+/* Choices */
+.choices-section h4 {
+    margin-bottom: 8px;
+    color: #8fd3f4;
+}
+
+.choices-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.choices-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(143, 211, 244, 0.1);
+}
+
+.no-choices {
+    font-style: italic;
+    color: #777;
+}
+
+/* Editor panel — reduced glow, cleaner */
+.editor-panel {
+    margin-top: 15px;
+}
+
+.editor-panel textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #111;
+    color: #f5f5f5;
+    resize: vertical;
+    transition: border 0.3s ease;
+}
+
+.editor-panel textarea:focus {
+    outline: none;
+    border-color: #8fd3f4;
+}
+
+.editor-panel button {
+    margin-top: 10px;
+}
+
+.editor-panel form input[type="text"],
+.editor-panel form select {
+    padding: 10px;
+    margin: 8px 0 12px 0;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #111;
+    color: #f5f5f5;
+    font-size: 1em;
+    transition: border 0.3s ease;
+}
+
+.editor-panel form input[type="text"]:focus,
+.editor-panel form select:focus {
+    outline: none;
+    border-color: #8fd3f4;
+}
+
+/* Ending status inputs & checkbox
+.editor-panel form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 12px 0;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #111;
+    color: #f5f5f5;
+    font-size: 1em;
+    transition: border 0.3s ease;
+}
+
+.editor-panel form input[type="text"]:focus {
+    outline: none;
+    border-color: #8fd3f4;
+}
+
+.editor-panel form label.ending-checkbox {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #8fd3f4;
+}
+
+.editor-panel form input[type="checkbox"] {
+    margin-right: 8px;
+} */
