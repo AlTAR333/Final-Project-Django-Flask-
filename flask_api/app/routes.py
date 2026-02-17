@@ -245,24 +245,15 @@ def create_story():
     if not author:
         return jsonify({"error": "Author is required"}), 400
 
-    new_story = Story(
-        title=title,
-        owner_username=author,
-        status="draft"
-    )
+    new_story = Story(title=title, owner_username=author, status="draft")
 
     db.session.add(new_story)
     db.session.commit()
 
-    first_page = Page(
-        story_id=new_story.id,
-        text="Start writing your story here...",
-        is_ending=False
-    )
+    first_page = Page(story_id=new_story.id, text="Start writing your story here...", is_ending=False)
 
     db.session.add(first_page)
     db.session.commit()
-
     new_story.start_page_id = first_page.id
     db.session.commit()
 
@@ -274,23 +265,16 @@ def create_story():
 @api.route("/stories/<int:story_id>", methods=["DELETE"])
 def delete_story(story_id):
     story = Story.query.get_or_404(story_id)
-
     for page in story.pages:
-
         page_choices = Choice.query.filter_by(page_id=page.id).all()
         for choice in page_choices:
             db.session.delete(choice)
-
-        incoming_choices = Choice.query.filter_by(
-            next_page_id=page.id
-        ).all()
+        incoming_choices = Choice.query.filter_by(next_page_id=page.id).all()
         for choice in incoming_choices:
             db.session.delete(choice)
-
         db.session.delete(page)
 
     db.session.delete(story)
-
     db.session.commit()
 
     return jsonify({"message": "Story deleted"}), 200

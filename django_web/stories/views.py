@@ -255,10 +255,7 @@ def toggle_ending(request, page_id, story_id):
         is_ending = request.POST.get("is_ending") == "true"
         ending_label = request.POST.get("ending_label", "")
 
-        requests.patch(
-            f"{FLASK_API_URL}/pages/{page_id}",
-            json={"is_ending": is_ending, "ending_label": ending_label}
-        )
+        requests.patch(f"{FLASK_API_URL}/pages/{page_id}", json={"is_ending": is_ending, "ending_label": ending_label})
 
     return redirect("edit_story", story_id=story_id)
 
