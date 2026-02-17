@@ -42,7 +42,9 @@
                 <ul class="choices-list">
                 {% for c in p.choices %}
                     <li class="choice-display">
+                        <div style="margin-left: 1rem;">
                         "{{ c.text }}" → Page {{ c.next_page_number }}
+                        </div>
                         <form method="post"
                             action="{% url 'delete_choice' story.id c.id %}"
                             class="inline-form">

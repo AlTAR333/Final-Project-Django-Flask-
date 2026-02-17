@@ -47,7 +47,7 @@ def delete_story(request, story_id):
     story = requests.get(f"{FLASK_API_URL}/stories/{story_id}").json()
     
     # check ownership (DONE)
-    if story.get("owner_id") != request.user.id and not request.user.is_staff:
+    if story.get("owner_username") != str(request.user) and not request.user.is_staff:
         messages.error(request, "You are not allowed to delete this story")
         return redirect("author_stories")
 
@@ -207,11 +207,8 @@ def toggle_story_status(request, story_id):
 
         response = requests.patch(
             f"{FLASK_API_URL}/stories/{story_id}/status",
-            json={
-                "status": new_status,
-                "username": request.user.username
-            }
-        )
+            json={"status": new_status, "username": request.user.username}
+            )
 
         print("Flask response:", response.status_code, response.text)
 
@@ -222,24 +219,14 @@ def edit_story(request, story_id):
     story = requests.get(f"{FLASK_API_URL}/stories/{story_id}").json()
     pages = requests.get(f"{FLASK_API_URL}/stories/{story_id}/pages").json()
 
-    return render(
-        request,
-        "gameplay/edit_story.html",
-        {
-            "story": story,
-            "pages": pages
-        }
-    )
+    return render(request, "gameplay/edit_story.html", {"story": story, "pages": pages})
 
 @login_required
 def create_page(request, story_id):
     if request.method == "POST":
         text = request.POST.get("text")
 
-        requests.post(
-            f"{FLASK_API_URL}/stories/{story_id}/pages",
-            json={"text": text}
-        )
+        requests.post(f"{FLASK_API_URL}/stories/{story_id}/pages", json={"text": text})
 
     return redirect("edit_story", story_id=story_id)
 
@@ -248,10 +235,7 @@ def update_page(request, page_id, story_id):
     if request.method == "POST":
         text = request.POST.get("text")
 
-        requests.patch(
-            f"{FLASK_API_URL}/pages/{page_id}",
-            json={"text": text}
-        )
+        requests.patch(f"{FLASK_API_URL}/pages/{page_id}", json={"text": text})
 
     return redirect("edit_story", story_id=story_id)
 
@@ -261,13 +245,7 @@ def create_choice(request, story_id, page_id):
         text = request.POST.get("text")
         next_page_id = request.POST.get("next_page_id")
 
-        requests.post(
-            f"{FLASK_API_URL}/pages/{page_id}/choices",
-            json={
-                "text": text,
-                "next_page_id": int(next_page_id)
-            }
-        )
+        requests.post(f"{FLASK_API_URL}/pages/{page_id}/choices", json={"text": text, "next_page_id": int(next_page_id)})
 
     return redirect("edit_story", story_id=story_id)
 
@@ -297,3 +275,21 @@ def delete_page(request, story_id, page_id):
         requests.delete(f"{FLASK_API_URL}/pages/{page_id}")
 
     return redirect("edit_story", story_id=story_id)
+
+@login_required
+def create_story(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        response = requests.post(f"{FLASK_API_URL}/stories", json={"title": title, "author": request.user.username})
+        story_id = response.json()["story_id"]
+        return redirect("edit_story", story_id=story_id)
+
+    return redirect("author_stories")
+
+@login_required
+def confirm_delete(request, story_id):
+    if request.method == "POST":
+        requests.delete(f"{FLASK_API_URL}/stories/{story_id}")
+        return redirect("author_stories")
+
+    return render(request, "stories/confirm_delete.html")

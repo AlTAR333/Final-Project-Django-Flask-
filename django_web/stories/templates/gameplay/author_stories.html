@@ -27,4 +27,15 @@
 {% endfor %}
 </ul>
 
+<h2>Create New Story</h2>
+
+<form method="post" action="{% url 'create_story' %}">
+    {% csrf_token %}
+    <input type="text" name="title" placeholder="Story title" required>
+    <button type="submit">Create Story</button>
+</form>
+
+<hr>
+
+
 {% endblock %}

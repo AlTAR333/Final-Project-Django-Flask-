@@ -26,6 +26,8 @@ urlpatterns = [
 
     path("author/story/<int:story_id>/page/<int:page_id>/create_choice/", views.create_choice, name="create_choice"),
     path("author/story/<int:story_id>/choice/<int:choice_id>/delete/", views.delete_choice, name="delete_choice"),
-    
+
     path("author/story/<int:story_id>/page/<int:page_id>/toggle-ending/", views.toggle_ending, name="toggle_ending"),
+    path("author/story/create/", views.create_story, name="create_story"),
+    path("author/story/<int:story_id>/delete/", views.confirm_delete, name="confirm_delete"),
 ]

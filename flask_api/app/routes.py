@@ -56,7 +56,8 @@ def get_story(story_id):
         "title": story.title,
         "description": story.description,
         "status": story.status,
-        "start_page_id": story.start_page_id
+        "start_page_id": story.start_page_id,
+        "owner_username": story.owner_username
     })
 
 
@@ -233,6 +234,66 @@ def delete_page(page_id):
     db.session.commit()
 
     return jsonify({"message": "Page deleted"})
+
+@api.route("/stories", methods=["POST"])
+def create_story():
+    data = request.get_json() or {}
+
+    title = data.get("title", "Untitled Story")
+    author = data.get("author")
+
+    if not author:
+        return jsonify({"error": "Author is required"}), 400
+
+    new_story = Story(
+        title=title,
+        owner_username=author,
+        status="draft"
+    )
+
+    db.session.add(new_story)
+    db.session.commit()
+
+    first_page = Page(
+        story_id=new_story.id,
+        text="Start writing your story here...",
+        is_ending=False
+    )
+
+    db.session.add(first_page)
+    db.session.commit()
+
+    new_story.start_page_id = first_page.id
+    db.session.commit()
+
+    return jsonify({
+        "message": "Story created",
+        "story_id": new_story.id
+    }), 201
+
+@api.route("/stories/<int:story_id>", methods=["DELETE"])
+def delete_story(story_id):
+    story = Story.query.get_or_404(story_id)
+
+    for page in story.pages:
+
+        page_choices = Choice.query.filter_by(page_id=page.id).all()
+        for choice in page_choices:
+            db.session.delete(choice)
+
+        incoming_choices = Choice.query.filter_by(
+            next_page_id=page.id
+        ).all()
+        for choice in incoming_choices:
+            db.session.delete(choice)
+
+        db.session.delete(page)
+
+    db.session.delete(story)
+
+    db.session.commit()
+
+    return jsonify({"message": "Story deleted"}), 200
 
 def _serialize_page(page):
     return jsonify({
